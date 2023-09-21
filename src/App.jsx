@@ -3,6 +3,7 @@ import { useState } from 'react'
 import styled from "styled-components"
 import CryptoJS from 'crypto-js'
 import OpenAI from "openai";
+import { Link } from 'react-router-dom';
 
 const Home = styled.div`
   position: absolute;
@@ -52,13 +53,13 @@ function App() {
 
   return (
     <Home>
-        <Header>
-          <span>Home</span>
-          <span>Leaderboard</span>
-          <span>Smartly</span>
-          <span>Create Quiz</span>
-          <span>Profile</span>
-        </Header>
+      <Header>
+        <Link to={"/"}><span>Home</span></Link>
+        <Link to={"/leadeboard"}><span>Leaderboard</span></Link>
+        <span>Smartly Portal</span>
+        <Link to={"/create"}><span>Create Quiz</span></Link>
+        <Link to={"/profile"}><span>Profile</span></Link>
+      </Header>
     </Home>
   )
 }
