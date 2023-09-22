@@ -4,26 +4,21 @@ import styled from "styled-components"
 import CryptoJS from 'crypto-js'
 import OpenAI from "openai";
 import { Link } from 'react-router-dom';
+import { AvatarGenerator } from 'random-avatar-generator';
+import { createBrowserRouter, RouterProvider, } from "react-router-dom";
 
-const Home = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-`
+import bgCircle1 from "./assets/bg-circle-1.svg"
+import bgCircle2 from "./assets/bg-circle-2.svg"
 
-const Header = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  padding: 20px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-evenly;
-`
+import Onboarding from './flows/Onboarding';
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Onboarding />,
+  },
+]);
+
 
 function App() {
 
@@ -46,22 +41,42 @@ function App() {
     setQuiz(await openai.createCompletion({
       model: "gpt-3.5-turbo-instruct",
       prompt: `respond only in code and strictly dont include any other supporting text in your response with a ${numberOfQuestion} unique, new and random questions with 4 options quiz on topic ${topic} of ${level} level with different pointsIfCorrenct for each question depending on level of difficulty but with total for all questions equal to 100 in an array of objects format only, strictly use the below scema only: 
-              [ { question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" } ]`,
+      [ { question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" } ]`,
       temperature: 1,
     }))
   }
 
+  const generateAvatar = (address) => {
+    const generator = new AvatarGenerator();
+    return generator.generateRandomAvatar(address);
+  }
+
   return (
     <Home>
-      <Header>
-        <Link to={"/"}><span>Home</span></Link>
-        <Link to={"/leadeboard"}><span>Leaderboard</span></Link>
-        <span>Smartly Portal</span>
-        <Link to={"/create"}><span>Create Quiz</span></Link>
-        <Link to={"/profile"}><span>Profile</span></Link>
-      </Header>
+      <BGCircle style={{ top: 0, right: 0 }} src={bgCircle1} />
+      <RouterProvider router={router} />
+      <BGCircle style={{ bottom: 0, left: 0 }} src={bgCircle2} />
     </Home>
   )
 }
 
 export default App
+
+const Home = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #6A5AE0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+`
+
+const BGCircle = styled.img`
+  position: absolute;
+  height: 40vh;
+`
