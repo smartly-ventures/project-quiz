@@ -69,7 +69,7 @@ const Highlight = styled.span`
 
 const Image = styled.img`
     width: 400px;
-    height: 50%;
+    height: 40%;
     margin-top: 80px;
 `
 

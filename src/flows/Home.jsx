@@ -3,11 +3,6 @@ import styled from 'styled-components'
 import { useAccount } from 'wagmi';
 import { AvatarGenerator } from 'random-avatar-generator';
 
-import homeActive from "../assets/navigator-home-active.svg"
-import searchNotActive from "../assets/navigator-search-not-active.svg"
-import createActive from "../assets/navigator-create-active.svg"
-import leaderboardNotActive from "../assets/navigator-leaderboard-not-active.svg"
-import profileNotActive from "../assets/navigator-profile-not-active.svg"
 import welcomeSun from "../assets/welcome-sun.svg"
 import challengeFriends from "../assets/challenge-friends.svg"
 import card1BG from "../assets/card1-bg.svg"
@@ -55,14 +50,6 @@ const Home = () => {
                 <Text2 style={{ fontWeight: "600", width: "80%", maxWidth: "350px", textAlign: "center", margin: "10px 0" }}>Make a Quiz and ask your friends to bet on their knowlegde, earn SIQ Tokens and NFTs!</Text2>
                 <Button><img style={{ marginRight: "10px" }} src={challengeFriends} />Challenge Friends</Button>
             </Card2>
-
-            <Navigator>
-                <Icons src={homeActive} />
-                <Icons src={searchNotActive} />
-                <Icons style={{ backgroundColor: "#6A5AE0", padding: "5px", borderRadius: "50%" }} src={createActive} />
-                <Icons src={leaderboardNotActive} />
-                <Icons src={profileNotActive} />
-            </Navigator>
         </Wrapper>
     )
 }
@@ -76,28 +63,6 @@ const Wrapper = styled.div`
     flex-direction: column;
     align-items: center;
     z-index: 2;
-`
-
-const Navigator = styled.div`
-    width: 100%;
-    max-width: 600px;
-    padding: 20px;
-    border-radius: 18px 18px 0 0;
-
-    background-color: white;
-    color: black;
-
-    position: fixed;
-    bottom: 0px;
-
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-evenly;
-`
-
-const Icons = styled.img`
-    cursor: pointer;
 `
 
 const Header = styled.div`

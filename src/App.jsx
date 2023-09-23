@@ -9,7 +9,7 @@ import bgCircle1 from "./assets/bg-circle-1.svg"
 import bgCircle2 from "./assets/bg-circle-2.svg"
 
 import Onboarding from './flows/Onboarding';
-import Home from './flows/Home';
+import Main from './flows/Main';
 
 function App() {
 
@@ -54,7 +54,7 @@ function App() {
     <Wrapper>
       <BGCircle style={{ top: 0, right: 0 }} src={bgCircle1} />
       {
-        isConnected ? <Home /> : <Onboarding />
+        isConnected ? <Main /> : <Onboarding />
       }
       <BGCircle style={{ bottom: 0, left: 0 }} src={bgCircle2} />
     </Wrapper>
@@ -67,8 +67,8 @@ const Wrapper = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background-color: #6A5AE0;
 
   display: flex;
