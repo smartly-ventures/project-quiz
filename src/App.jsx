@@ -39,6 +39,16 @@ function App() {
 
   const { address, isConnected } = useAccount()
 
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker &&
+        navigator.serviceWorker.register("/sw.js")
+          .then(function (registration) {
+            console.log("Excellent, registered with scope: ", registration.scope);
+          });
+    }
+  }, [navigator])
+
 
   return (
     <Wrapper>
