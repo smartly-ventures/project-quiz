@@ -6,7 +6,6 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import onboardingImage1 from "../assets/onboarding-image-1.svg"
 import onboardingImage2 from "../assets/onboarding-image-2.svg"
 import onboardingImage3 from "../assets/onboarding-image-3.svg"
-import { redirect } from 'react-router-dom';
 
 const Wrapper = styled.div`
     width: 100%;
@@ -26,7 +25,7 @@ const Navigator = styled.div`
     background-color: white;
     color: black;
 
-    position: absolute;
+    position: fixed;
     bottom: 20px;
 
     display: flex;
@@ -37,6 +36,7 @@ const Navigator = styled.div`
 
 const Button = styled.button`
     background-color: #6A5AE0;
+    color: white;
     border-radius: 18px;
     font-size: 16px;
     font-weight: 500;
@@ -164,7 +164,7 @@ const Onboarding = () => {
                                     }
 
                                     return (
-                                        <Button onClick={() => {window.location = "/home"}} type="button">
+                                        <Button type="button">
                                             Play Smartly!
                                         </Button>
                                     );

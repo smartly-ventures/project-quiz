@@ -25,7 +25,7 @@ const Home = () => {
     }
 
     const generateAvatar = (address) => {
-        const generator = new AvatarGenerator();
+        const generator = new AvatarGenerator({});
         return generator.generateRandomAvatar(address);
     }
 
@@ -87,7 +87,7 @@ const Navigator = styled.div`
     background-color: white;
     color: black;
 
-    position: absolute;
+    position: fixed;
     bottom: 0px;
 
     display: flex;

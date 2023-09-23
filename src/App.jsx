@@ -4,25 +4,12 @@ import styled from "styled-components"
 import CryptoJS from 'crypto-js'
 import OpenAI from "openai";
 import { useAccount } from 'wagmi'
-import { createBrowserRouter, RouterProvider, } from "react-router-dom";
 
 import bgCircle1 from "./assets/bg-circle-1.svg"
 import bgCircle2 from "./assets/bg-circle-2.svg"
 
 import Onboarding from './flows/Onboarding';
 import Home from './flows/Home';
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Onboarding />,
-  },
-  {
-    path: "/home",
-    element: <Home />,
-  },
-]);
-
 
 function App() {
 
@@ -52,17 +39,13 @@ function App() {
 
   const { address, isConnected } = useAccount()
 
-  useEffect(() => {
-    if (!isConnected && window.location.pathname != "/") {
-      window.location.pathname = "/"
-    }
-  }, [useAccount()])
-
 
   return (
     <Wrapper>
       <BGCircle style={{ top: 0, right: 0 }} src={bgCircle1} />
-      <RouterProvider router={router} />
+      {
+        isConnected ? <Home /> : <Onboarding />
+      }
       <BGCircle style={{ bottom: 0, left: 0 }} src={bgCircle2} />
     </Wrapper>
   )
