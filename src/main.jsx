@@ -28,8 +28,9 @@ const wagmiConfig = createConfig({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <WagmiConfig config={wagmiConfig}>
-    <RainbowKitProvider chains={chains} theme={darkTheme()} initialChain={polygonMumbai}>
+    <RainbowKitProvider appInfo={{ appName: 'Smartly' }} chains={chains} theme={darkTheme()} initialChain={polygonMumbai}>
       <App />
     </RainbowKitProvider>
   </WagmiConfig>
+  ,
 )

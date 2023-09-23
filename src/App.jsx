@@ -1,21 +1,25 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import styled from "styled-components"
 import CryptoJS from 'crypto-js'
 import OpenAI from "openai";
-import { Link } from 'react-router-dom';
-import { AvatarGenerator } from 'random-avatar-generator';
+import { useAccount } from 'wagmi'
 import { createBrowserRouter, RouterProvider, } from "react-router-dom";
 
 import bgCircle1 from "./assets/bg-circle-1.svg"
 import bgCircle2 from "./assets/bg-circle-2.svg"
 
 import Onboarding from './flows/Onboarding';
+import Home from './flows/Home';
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Onboarding />,
+  },
+  {
+    path: "/home",
+    element: <Home />,
   },
 ]);
 
@@ -46,28 +50,32 @@ function App() {
     }))
   }
 
-  const generateAvatar = (address) => {
-    const generator = new AvatarGenerator();
-    return generator.generateRandomAvatar(address);
-  }
+  const { address, isConnected } = useAccount()
+
+  useEffect(() => {
+    if (!isConnected && window.location.pathname != "/") {
+      window.location.pathname = "/"
+    }
+  }, [useAccount()])
+
 
   return (
-    <Home>
+    <Wrapper>
       <BGCircle style={{ top: 0, right: 0 }} src={bgCircle1} />
       <RouterProvider router={router} />
       <BGCircle style={{ bottom: 0, left: 0 }} src={bgCircle2} />
-    </Home>
+    </Wrapper>
   )
 }
 
 export default App
 
-const Home = styled.div`
+const Wrapper = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background-color: #6A5AE0;
 
   display: flex;
@@ -78,5 +86,5 @@ const Home = styled.div`
 
 const BGCircle = styled.img`
   position: absolute;
-  height: 40vh;
+  height: 40%;
 `

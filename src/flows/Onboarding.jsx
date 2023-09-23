@@ -1,20 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import styled from "styled-components"
 
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+
 import onboardingImage1 from "../assets/onboarding-image-1.svg"
 import onboardingImage2 from "../assets/onboarding-image-2.svg"
 import onboardingImage3 from "../assets/onboarding-image-3.svg"
+import { redirect } from 'react-router-dom';
 
 const Wrapper = styled.div`
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 2;
 `
 
 const Navigator = styled.div`
-    width: 80%;
+    width: 90%;
     max-width: 500px;
     padding: 20px;
     border-radius: 18px;
@@ -38,6 +42,7 @@ const Button = styled.button`
     font-weight: 500;
     padding: 15px;
     width: 90%;
+    white-space: nowrap;
     margin: 20px 0;
 `
 
@@ -64,7 +69,7 @@ const Highlight = styled.span`
 
 const Image = styled.img`
     width: 400px;
-    height: 50vh;
+    height: 50%;
     margin-top: 80px;
 `
 
@@ -104,14 +109,71 @@ const Onboarding = () => {
         }, 5000);
     }, [slideIndex])
 
-
     return (
         <Wrapper>
             <Image src={image} />
             <Navigator>
                 <TextPrimary>{text}</TextPrimary>
-                <Button>Sign Up</Button>
-                <TextSecondary>Already have an account? <Highlight>Connect Wallet</Highlight></TextSecondary>
+                <ConnectButton.Custom>
+                    {({
+                        account,
+                        chain,
+                        openAccountModal,
+                        openChainModal,
+                        openConnectModal,
+                        authenticationStatus,
+                        mounted,
+                    }) => {
+                        // Note: If your app doesn't use authentication, you
+                        // can remove all 'authenticationStatus' checks
+                        const ready = mounted && authenticationStatus !== 'loading';
+                        const connected =
+                            ready &&
+                            account &&
+                            chain &&
+                            (!authenticationStatus ||
+                                authenticationStatus === 'authenticated');
+
+                        return (
+                            <div
+                                style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}
+                                {...(!ready && {
+                                    'aria-hidden': true,
+                                    'style': {
+                                        opacity: 0,
+                                        pointerEvents: 'none',
+                                        userSelect: 'none',
+                                    },
+                                })}
+                            >
+                                {(() => {
+                                    if (!connected) {
+                                        return (
+                                            <Button onClick={openConnectModal} type="button">
+                                                Connect Wallet
+                                            </Button>
+                                        );
+                                    }
+
+                                    if (chain.unsupported) {
+                                        return (
+                                            <Button onClick={openChainModal} type="button">
+                                                Wrong network
+                                            </Button>
+                                        );
+                                    }
+
+                                    return (
+                                        <Button onClick={() => {window.location = "/home"}} type="button">
+                                            Play Smartly!
+                                        </Button>
+                                    );
+                                })()}
+                            </div>
+                        );
+                    }}
+                </ConnectButton.Custom>
+                <TextSecondary>We support the following chains <Highlight>Polygon, Optimism, and Binance</Highlight></TextSecondary>
             </Navigator>
         </Wrapper>
     )
