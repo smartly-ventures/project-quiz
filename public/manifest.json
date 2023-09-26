@@ -1,21 +1,42 @@
 {
+    "packageId": "smartly.scq",
+    "host": "smartly-portal.vercel.app",
     "name": "Smartly",
-    "short_name" : "Smartly",
-    "start_url": "index.html?utm_source=homescreen",
-    "scope" : "./",
-    "icons": [
-        {
-            "src": "./logo.svg",
-            "sizes": "192x192",
-            "type": "image/svg"
-        },
-        {
-            "src": "./logo.svg",
-            "sizes": "512x512",
-            "type": "image/svg"
-        }
-    ],
-    "theme_color": "#6A5AE0",
-    "background_color": "#6A5AE0",
-    "display": "standalone"
-}
+    "launcherName": "Smartly",
+    "display": "fullscreen",
+    "themeColor": "#6A5AE0",
+    "themeColorDark": "#000000",
+    "navigationColor": "#000000",
+    "navigationColorDark": "#000000",
+    "navigationDividerColor": "#000000",
+    "navigationDividerColorDark": "#000000",
+    "backgroundColor": "#6A5AE0",
+    "enableNotifications": true,
+    "startUrl": "/",
+    "iconUrl": "https://s3.ap-south-1.amazonaws.com/third.computer/logo.svg",
+    "splashScreenFadeOutDuration": 300,
+    "signingKey": {
+      "path": "C:\\Users\\ojasr\\OneDrive\\Desktop\\Work\\Code\\Smartly\\android.keystore",
+      "alias": "android"
+    },
+    "appVersionName": "1",
+    "appVersionCode": 1,
+    "shortcuts": [],
+    "generatorApp": "bubblewrap-cli",
+    "webManifestUrl": "https://s3.ap-south-1.amazonaws.com/third.computer/manifest.json",
+    "fallbackType": "customtabs",
+    "features": {},
+    "alphaDependencies": {
+      "enabled": false
+    },
+    "enableSiteSettingsShortcut": true,
+    "isChromeOSOnly": false,
+    "isMetaQuest": false,
+    "fullScopeUrl": "https://s3.ap-south-1.amazonaws.com/third.computer/",
+    "minSdkVersion": 19,
+    "orientation": "portrait",
+    "fingerprints": [],
+    "additionalTrustedOrigins": [],
+    "retainedBundles": [],
+    "appVersion": "1"
+  }

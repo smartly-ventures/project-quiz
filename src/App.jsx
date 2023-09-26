@@ -75,9 +75,10 @@ const Wrapper = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  overflow-x: hidden;
 `
 
 const BGCircle = styled.img`
-  position: absolute;
+  position: fixed;
   height: 40%;
 `

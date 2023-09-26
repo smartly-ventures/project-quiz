@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { useAccount } from 'wagmi';
-import { AvatarGenerator } from 'random-avatar-generator';
+import Avatar from "boring-avatars";
 
 import welcomeSun from "../assets/welcome-sun.svg"
 import challengeFriends from "../assets/challenge-friends.svg"
@@ -19,11 +19,6 @@ const Home = () => {
         trimmedAddress2 = address.substring(0, 10) + "..." + address.substring(31, 41)
     }
 
-    const generateAvatar = (address) => {
-        const generator = new AvatarGenerator({});
-        return generator.generateRandomAvatar(address);
-    }
-
     return (
         <Wrapper>
             <Header>
@@ -31,7 +26,11 @@ const Home = () => {
                     <Text1><img style={{ marginRight: "10px" }} src={welcomeSun} />Welcome To The Game!</Text1>
                     <Text2>{trimmedAddress}</Text2>
                 </HeaderTextSection>
-                <UserPFP src={generateAvatar(address)} />
+                <Avatar
+                    size={40}
+                    name={address}
+                    variant="beam"
+                />
             </Header>
 
             <Card1>

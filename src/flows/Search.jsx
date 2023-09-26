@@ -4,7 +4,7 @@ import styled from 'styled-components'
 const Search = () => {
   return (
     <Wrapper>
-      
+      <TextPrimary style={{ margin: "50px 0 10px 0" }} >Search</TextPrimary>
     </Wrapper>
   )
 }
@@ -18,4 +18,12 @@ const Wrapper = styled.div`
     flex-direction: column;
     align-items: center;
     z-index: 2;
+`
+
+const TextPrimary = styled.span`
+  text-align: center;
+  color: white;
+  font-size: 24px;
+  font-weight: 600;
+  width: 90%;
 `
