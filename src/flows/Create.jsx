@@ -1,10 +1,205 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import JSConfetti from 'js-confetti'
+import CryptoJS from 'crypto-js'
+import OpenAI from "openai";
+import toast, { Toaster } from 'react-hot-toast';
+
+import aiQuiz from "../assets/create-ai-quiz.svg"
+import manualQuiz from "../assets/create-manual-quiz.svg"
+import addOption from "../assets/create-add-option.svg"
+import finalBG from "../assets/create-final-bg.svg"
 
 const Create = () => {
+
+  const [quiz, setQuiz] = useState({ quizTitle: "", quizDescription: "", questions: [] })
+
+  //{ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" }
+
+  const encryptQuiz = (decryptedQuiz) => {
+    return CryptoJS.AES.encrypt(JSON.stringify(decryptedQuiz), import.meta.env.VITE_AES_SECRET_KEY).toString();
+  }
+  const decryptQuiz = (encryptedQuiz) => {
+    var bytes = CryptoJS.AES.decrypt(encryptedQuiz, import.meta.env.VITE_AES_SECRET_KEY);
+    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+  }
+
+  const openai = new OpenAI({
+    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true
+  });
+
+  const getQuiz = async (numberOfQuestion, topic, level) => {
+    let tempQuiz = quiz;
+    tempQuiz.questions.push(await openai.createCompletion({
+      model: "gpt-3.5-turbo-instruct",
+      prompt: `respond only in code and strictly dont include any other supporting text in your response with a ${numberOfQuestion} unique, new and random questions with 4 options quiz on topic ${topic} of ${level} level with different pointsIfCorrenct for each question depending on level of difficulty but with total for all questions equal to 100 in an array of objects format only, strictly use the below scema only: 
+            [ { question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" } ]`,
+      temperature: 1,
+    }))
+    setQuiz(tempQuiz);
+  }
+
+  const sendThemFlying = () => {
+    const jsConfetti = new JSConfetti()
+    jsConfetti.addConfetti({
+      emojis: ['🏆'],
+      emojiSize: 100,
+      confettiNumber: 30,
+    })
+  }
+
+  const [title, setTitle] = useState("Create Quiz")
+
+  const sendNotification = () => {
+    if (creatorMode != "") {
+      if (quizTitle != "") {
+        if (quizDescription != "") {
+          quiz.quizTitle = quizTitle;
+          quiz.quizDescription = quizDescription;
+          toast('Creating Quiz...', { style: { padding: '10px', color: '#FFFFFF', background: "#FFB380" } });
+          if (creatorMode == "ai") {
+            setTitle("Finalize Quiz")
+            getQuiz(10, title, "intermidiate")
+          } else {
+            setTitle("Add Questions")
+          }
+        } else {
+          toast.error('Description Required');
+        }
+      } else {
+        toast.error('Title Required');
+      }
+    } else {
+      toast.error('Select Creator Mode');
+    }
+  }
+
+  const sendNotificationQuestion = () => {
+    if (question.question != "") {
+      if (question.pointsIfCorrenct != "") {
+        if (question.options != "") {
+          let tempQuiz = quiz;
+          tempQuiz.questions.push(question);
+          setQuiz(tempQuiz);
+          setQuestion({ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" });
+          toast.success('Question Added');
+        } else {
+          toast.error('Description Required');
+        }
+      } else {
+        toast.error('Add Points');
+      }
+    } else {
+      toast.error('Add Question');
+    }
+  }
+
+  const [creatorMode, setCreatorMode] = useState("")
+  const [quizTitle, setQuizTitle] = useState("")
+  const [quizDescription, setQuizDescription] = useState("")
+  const [openAnswerDiv, setOpenAnswerDiv] = useState(0)
+  const [question, setQuestion] = useState({ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" })
+
+
+  useEffect(() => {
+    console.log(quiz)
+    console.log(question)
+  }, [quiz, question])
+
+
   return (
     <Wrapper>
-      <TextPrimary style={{ margin: "50px 0 10px 0" }} >Create Quiz</TextPrimary>
+      <TextPrimary style={{ margin: "50px 0 10px 0" }} >{title}</TextPrimary>
+      {
+        title == "Create Quiz" ?
+          <QuizDiv>
+            <Choices>
+              <BoxChoices style={creatorMode == "ai" ? { background: "#FF8FA2" } : {}} onClick={() => { setCreatorMode("ai") }} >
+                <Icons src={aiQuiz} />
+                <TextPrimary style={{ fontSize: "14px", marginTop: "10px" }} >Create Quiz <br /> With AI</TextPrimary>
+              </BoxChoices>
+              <BoxChoices style={creatorMode == "manual" ? { background: "#FF8FA2" } : {}} onClick={() => { setCreatorMode("manual") }} >
+                <Icons src={manualQuiz} />
+                <TextPrimary style={{ fontSize: "14px", marginTop: "10px" }} >Create Quiz <br /> Manually</TextPrimary>
+              </BoxChoices>
+            </Choices>
+            <Label>Title</Label>
+            <Input placeholder="Are You A Web3 Degen?" onChange={(e) => setQuizTitle(e.target.value)} />
+            <Label>Description</Label>
+            <Input placeholder="Prove You Are A Degen By Taking This Quiz..." onChange={(e) => setQuizDescription(e.target.value)} />
+            <Button onClick={sendNotification} >Create Quiz</Button>
+          </QuizDiv> :
+
+          title == "Add Questions" ?
+            <QuizDiv style={{ paddingBottom: "80px" }} >
+              <QuestionNumber>{quiz.questions.length + 1}</QuestionNumber>
+
+              <Label>Add Question</Label>
+              <Input placeholder="Do you make smart contract quizzes using smartly?" onChange={(e) => question.question = e.target.value} />
+              <Label>Set Points</Label>
+              <Input type='number' placeholder='69' onChange={(e) => question.pointsIfCorrenct = e.target.value} />
+              <Label>Add Options</Label>
+
+              <Choices>
+                <BoxChoices style={question.correctOption == 1 ? { background: "#C9F2E9" } : question.correctOption == "" ? {} : { background: "#FF8FA2" }} onClick={() => { setOpenAnswerDiv(1) }} >
+                  <Icons2 src={addOption} />
+                  <TextPrimary style={{ fontSize: "14px", marginTop: "10px" }} >Add Option</TextPrimary>
+                </BoxChoices>
+                <BoxChoices style={question.correctOption == 2 ? { background: "#C9F2E9" } : question.correctOption == "" ? {} : { background: "#FF8FA2" }} onClick={() => { setOpenAnswerDiv(2) }} >
+                  <Icons2 src={addOption} />
+                  <TextPrimary style={{ fontSize: "14px", marginTop: "10px" }} >Add Option</TextPrimary>
+                </BoxChoices>
+              </Choices>
+              <Choices>
+                <BoxChoices style={question.correctOption == 3 ? { background: "#C9F2E9" } : question.correctOption == "" ? {} : { background: "#FF8FA2" }} onClick={() => { setOpenAnswerDiv(3) }} >
+                  <Icons2 src={addOption} />
+                  <TextPrimary style={{ fontSize: "14px", marginTop: "10px" }} >Add Option</TextPrimary>
+                </BoxChoices>
+                <BoxChoices style={question.correctOption == 4 ? { background: "#C9F2E9" } : question.correctOption == "" ? {} : { background: "#FF8FA2" }} onClick={() => { setOpenAnswerDiv(4) }} >
+                  <Icons2 src={addOption} />
+                  <TextPrimary style={{ fontSize: "14px", marginTop: "10px" }} >Add Option</TextPrimary>
+                </BoxChoices>
+              </Choices>
+
+              <Button type="reset" onClick={sendNotificationQuestion} >Add Question</Button>
+              {quiz.questions.length != 0 ? <Button style={{ marginTop: "-5px" }} onClick={() => { setTitle("Finalize Quiz") }} >Complete Quiz</Button> : <></>}
+            </QuizDiv> :
+
+
+            <>
+              <FinalBG src={finalBG} />
+              <QuizDiv>
+                <Label style={{ fontSize: "16px" }} >Title: {quiz.quizTitle}</Label>
+                <Label style={{ fontSize: "12px", color: "#858494" }} >Description: {quiz.quizDescription}</Label>
+              </QuizDiv>
+              <QuizDiv style={{ paddingBottom: "80px" }}>
+                <Label style={{ fontSize: "16px" }} >Questions:</Label>
+                {quiz.questions.map((question, index) => {
+                  return (
+                    <Question>
+                      <SrNo>{index + 1}</SrNo>
+                      <Text>{question.question}</Text>
+                    </Question>
+                  )
+                })}
+                <Button type="reset" onClick={{}} >Upload Questions</Button>
+              </QuizDiv>
+            </>
+      }
+      <Toaster position="top-right" />
+
+      <AnsBG style={openAnswerDiv != 0 ? {} : { display: "none" }} >
+        <AnswerDiv>
+          <Label>Add Answer</Label>
+          <Input onChange={(e) => { question.options[openAnswerDiv] = e.target.value }} />
+          <ISCorrectDiv>
+            <Label style={{ width: "40%", margin: "5px 0" }} >Is Correct?</Label>
+            <Input style={{ width: "15px", height: "15px" }} type='checkbox' onChange={(e) => { question.correctOption = openAnswerDiv }} />
+          </ISCorrectDiv>
+          <Button type='reset' onClick={() => { setOpenAnswerDiv(0) }} >Add Answer</Button>
+        </AnswerDiv>
+      </AnsBG>
     </Wrapper>
   )
 }
@@ -26,4 +221,187 @@ const TextPrimary = styled.span`
   font-size: 24px;
   font-weight: 600;
   width: 90%;
+`
+
+const QuizDiv = styled.form`
+  width: 90%;
+  max-width: 500px;
+
+  padding: 20px;
+  border-radius: 18px;
+  margin-top: 15px;
+
+  background-color: #EFEEFC;
+  color: black;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`
+
+const Label = styled.span`
+    color: #000000;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 15px;
+    outline: none;
+    width: 90%;
+    text-align: left;
+`
+
+const Input = styled.input`
+    color: #858494;
+    background: #FFFFFF;
+    border: 2px solid #C4D0FB;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 15px;
+    margin: 5px 0;
+    outline: none;
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+`
+
+const Button = styled.button`
+    color: #FFFFFF;
+    background: #6A5AE0;
+    border-radius: 18px;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 15px;
+    white-space: nowrap;
+    margin: 20px 0 10px 0;
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+`
+
+const BoxChoices = styled.div`
+    background: #C4D0FB;
+    padding: 15px;
+    width: 40%;
+    height: 150px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+`
+
+const Choices = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    margin-top: 20px;
+    width: 100%;
+`
+
+const Icons = styled.img`
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+`
+
+const Icons2 = styled.img`
+`
+
+const AnswerDiv = styled.form`
+  width: 90%;
+  max-width: 450px;
+
+  position: absolute;
+  padding: 20px;
+  border-radius: 18px;
+  z-index: 20;
+
+  background-color: #FFF;
+  color: black;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`
+
+const AnsBG = styled.div`
+  width: 100%;
+  height: 100%;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20;
+
+  background-color: rgba(0,0,0,0.5);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`
+
+const ISCorrectDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 15px;
+  width: 90%;
+`
+
+const QuestionNumber = styled.div`
+  background: black;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+`
+
+const Question = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px 0;
+  background: #FFFFFF;
+  width: 90%;
+  padding: 20px;
+  border-radius: 12px;
+`
+
+const SrNo = styled.div`
+    color: #858494;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    border: 2px solid #E6E6E6;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0 20px;
+    padding: 10px;
+`
+
+const Text = styled.div`
+    margin: 0 20px;
+    font-size: 14px;
+    font-weight: 400;
+`
+
+const FinalBG = styled.img`
+  width: 90%;
+  max-width: 450px;
+  margin: 10px 0 -15px 0;
 `

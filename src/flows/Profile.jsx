@@ -97,12 +97,12 @@ const TextPrimary = styled.span`
   color: white;
   font-size: 24px;
   font-weight: 600;
-  width: 90%;
+  width: 95%;
   margin-bottom: 30px;
 `
 
 const ProfileData = styled.div`
-  width: 90%;
+  width: 95%;
   max-width: 550px;
   height: 80%;
   padding: 20px;
@@ -125,12 +125,12 @@ const Text = styled.div`
     font-size: 20px;
     font-weight: 600;
     text-align: center;
-    width: 80%;
+    width: 95%;
 `
 
 const UserStats = styled.div`
   background: #6A5AE0;
-  width: 90%;
+  width: 95%;
   padding: 20px;
   margin-top: 30px;
   border-radius: 12px;
@@ -141,7 +141,7 @@ const UserStats = styled.div`
 `
 
 const Navigator = styled.div`
-    width: 90%;
+    width: 100%;
     max-width: 600px;
     padding: 20px;
 
@@ -180,7 +180,7 @@ const ProfileCardText = styled.div`
 
 const StatsCard = styled.div`
   background: #E8E5FA;
-  width: 90%;
+  width: 95%;
   padding: 20px;
   border-radius: 12px;
   display: flex;
