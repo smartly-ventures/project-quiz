@@ -4,6 +4,11 @@ import JSConfetti from 'js-confetti'
 import CryptoJS from 'crypto-js'
 import OpenAI from "openai";
 import toast, { Toaster } from 'react-hot-toast';
+import { useAccount } from 'wagmi';
+import { ethers } from 'ethers';
+
+import deployer from "../abi/deployer.json"
+import quizABI from "../abi/quiz.json"
 
 import aiQuiz from "../assets/create-ai-quiz.svg"
 import manualQuiz from "../assets/create-manual-quiz.svg"
@@ -12,16 +17,88 @@ import finalBG from "../assets/create-final-bg.svg"
 
 const Create = () => {
 
-  const [quiz, setQuiz] = useState({ quizTitle: "", quizDescription: "", questions: [] })
+  const [quizCreated, setQuizCreated] = useState(false)
 
-  //{ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" }
+  const { address } = useAccount()
+  const deployerContractAddress = "0xb072d8deDb8B98baE0973E6F89D791A517962974";
+  const DeployerABI = deployer.output.abi;
+
+  const [latestDeployedAddress, setLatestDeployedAddress] = useState("0xb072d8deDb8B98baE0973E6F89D791A517962974")
+
+  const deployQuiz = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider =
+          new ethers.providers.Web3Provider(
+            ethereum,
+          );
+        const signer = provider.getSigner();
+        const deployerContract =
+          new ethers.Contract(
+            deployerContractAddress,
+            DeployerABI,
+            signer,
+          );
+        toast('Deploying Quiz...', { style: { padding: '10px', color: '#FFFFFF', background: "#FFB380" } });
+        let deployNewQuiz =
+          await deployerContract.createQuiz(
+            quiz.quizTitle,
+            quiz.quizDescription
+          );
+        let res = await deployNewQuiz.wait();
+        console.log(res)
+        setQuizCreated(true)
+        setLatestDeployedAddress(await deployerContract.contractsDeployed(address, (Number(await deployerContract.numberOfContractsDeployed(address)) - 1)))
+        console.log(latestDeployedAddress)
+        toast.success("Quiz Deployed")
+      }
+
+    } catch (error) {
+      console.log(error.message);
+      toast.error('Failed Creating Quiz');
+    }
+  };
+
+  const QuizABI = quizABI.output.abi;
+
+  const uploadQuestion = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider =
+          new ethers.providers.Web3Provider(
+            ethereum,
+          );
+        const signer = provider.getSigner();
+        const quizContract =
+          new ethers.Contract(
+            latestDeployedAddress,
+            QuizABI,
+            signer,
+          );
+        toast('Uploading Question...', { style: { padding: '10px', color: '#FFFFFF', background: "#FFB380" } });
+        let uploadQuestion =
+          await quizContract.addQuestion(
+            encryptQuiz(quiz)
+          );
+        let res = await uploadQuestion.wait();
+        console.log(res)
+        toast.success("Questions Uploaded")
+      }
+
+    } catch (error) {
+      console.log(error.message);
+      toast.error('Failed To Add Questions');
+    }
+  };
+
+  const [quiz, setQuiz] = useState({ quizTitle: "", quizDescription: "", questions: [] })
 
   const encryptQuiz = (decryptedQuiz) => {
     return CryptoJS.AES.encrypt(JSON.stringify(decryptedQuiz), import.meta.env.VITE_AES_SECRET_KEY).toString();
-  }
-  const decryptQuiz = (encryptedQuiz) => {
-    var bytes = CryptoJS.AES.decrypt(encryptedQuiz, import.meta.env.VITE_AES_SECRET_KEY);
-    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
   }
 
   const openai = new OpenAI({
@@ -51,19 +128,22 @@ const Create = () => {
 
   const [title, setTitle] = useState("Create Quiz")
 
-  const sendNotification = () => {
+  const sendNotification = async () => {
     if (creatorMode != "") {
       if (quizTitle != "") {
         if (quizDescription != "") {
           quiz.quizTitle = quizTitle;
           quiz.quizDescription = quizDescription;
-          toast('Creating Quiz...', { style: { padding: '10px', color: '#FFFFFF', background: "#FFB380" } });
-          if (creatorMode == "ai") {
-            setTitle("Finalize Quiz")
-            getQuiz(10, title, "intermidiate")
-          } else {
-            setTitle("Add Questions")
+          await deployQuiz()
+          if (quizCreated) {
+            if (creatorMode == "ai") {
+              setTitle("Finalize Quiz")
+              getQuiz(10, title, "intermidiate")
+            } else {
+              setTitle("Add Questions")
+            }
           }
+          console.log("All Done")
         } else {
           toast.error('Description Required');
         }
@@ -75,7 +155,7 @@ const Create = () => {
     }
   }
 
-  const sendNotificationQuestion = () => {
+  const sendNotificationQuestion = async () => {
     if (question.question != "") {
       if (question.pointsIfCorrenct != "") {
         if (question.options != "") {
@@ -83,9 +163,8 @@ const Create = () => {
           tempQuiz.questions.push(question);
           setQuiz(tempQuiz);
           setQuestion({ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" });
-          toast.success('Question Added');
         } else {
-          toast.error('Description Required');
+          toast.error('Add Options');
         }
       } else {
         toast.error('Add Points');
@@ -128,7 +207,7 @@ const Create = () => {
             <Input placeholder="Are You A Web3 Degen?" onChange={(e) => setQuizTitle(e.target.value)} />
             <Label>Description</Label>
             <Input placeholder="Prove You Are A Degen By Taking This Quiz..." onChange={(e) => setQuizDescription(e.target.value)} />
-            <Button onClick={sendNotification} >Create Quiz</Button>
+            <Button type='reset' onClick={sendNotification} >Create Quiz</Button>
           </QuizDiv> :
 
           title == "Add Questions" ?
@@ -183,7 +262,7 @@ const Create = () => {
                     </Question>
                   )
                 })}
-                <Button type="reset" onClick={{}} >Upload Questions</Button>
+                <Button type="reset" onClick={async () => { await uploadQuestion() }} >Upload Questions</Button>
               </QuizDiv>
             </>
       }

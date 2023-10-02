@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useAccount } from 'wagmi';
 import Avatar from "boring-avatars";
+import { ethers } from 'ethers';
+
+import deployer from "../abi/deployer.json"
 
 import welcomeSun from "../assets/welcome-sun.svg"
 import challengeFriends from "../assets/challenge-friends.svg"
@@ -13,11 +16,45 @@ import card1Badge from "../assets/card1-badge.svg"
 const Home = () => {
 
     const { address } = useAccount()
-    let trimmedAddress, trimmedAddress2;
+    const [latestDeployedAddress, setLatestDeployedAddress] = useState("0x0000000000000000000000000000000000000000")
+    const deployerContractAddress = "0xb072d8deDb8B98baE0973E6F89D791A517962974";
+    const DeployerABI = deployer.output.abi;
+
+    const getLatestQuiz = async () => {
+        try {
+            const { ethereum } = window;
+
+            if (ethereum) {
+                const provider =
+                    new ethers.providers.Web3Provider(
+                        ethereum,
+                    );
+                const signer = provider.getSigner();
+                const deployerContract =
+                    new ethers.Contract(
+                        deployerContractAddress,
+                        DeployerABI,
+                        signer,
+                    );
+                setLatestDeployedAddress(await deployerContract.contractsDeployed(address, (Number(await deployerContract.numberOfContractsDeployed(address)) - 1)))
+                console.log(latestDeployedAddress)
+            }
+
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
+    let trimmedAddress, trimmedAddress2
     if (address) {
         trimmedAddress = address.substring(0, 8) + "..." + address.substring(35, 41)
-        trimmedAddress2 = address.substring(0, 10) + "..." + address.substring(31, 41)
+        trimmedAddress2 = latestDeployedAddress.substring(0, 10) + "..." + latestDeployedAddress.substring(31, 41)
     }
+
+    useEffect(() => {
+        getLatestQuiz()
+    }, [])
+
 
     return (
         <Wrapper>

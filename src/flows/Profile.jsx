@@ -1,7 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useAccount } from 'wagmi';
 import Avatar from "boring-avatars";
+import { ethers } from 'ethers';
+
+import deployer from "../abi/deployer.json"
 
 import cardDivider from "../assets/profile-card-divider.svg"
 import statsCardBG from "../assets/profile-statscard-bg.svg"
@@ -25,12 +28,53 @@ import playedIcon from "../assets/profile-played-icon.svg"
 const Profile = () => {
 
   const { address } = useAccount()
+  const [quizDeployed, setQuizDeployed] = useState(0)
+  const [quizPlayed, setQuizPlayed] = useState(0)
+  const [pointsEarned, setPointsEarned] = useState(0)
+
+  const deployerContractAddress =
+    "0xb072d8deDb8B98baE0973E6F89D791A517962974";
+  const DeployerABI = deployer.output.abi;
+
+  const deployerContract = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider =
+          new ethers.providers.Web3Provider(
+            ethereum,
+          );
+        const signer = provider.getSigner();
+        const deployerContract =
+          new ethers.Contract(
+            deployerContractAddress,
+            DeployerABI,
+            signer,
+          );
+
+        setQuizDeployed(Number(await deployerContract.numberOfContractsDeployed(address)))
+        setQuizPlayed(Number(await deployerContract.numberOfQuizzesPlayed(address)))
+        setPointsEarned(Number(await deployerContract.totalPointsEarned(address)))
+
+        console.log(quizDeployed, quizPlayed, pointsEarned)
+      }
+
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
 
   const trimAddress = (address) => {
     return address.substring(0, 10) + "..." + address.substring(31, 41)
   }
 
   const [currentTab, setCurrentTab] = useState("stats")
+
+  useEffect(() => {
+    deployerContract()
+  }, [])
 
   return (
     <Wrapper>
@@ -41,17 +85,17 @@ const Profile = () => {
         <UserStats>
           <ProfileCardData>
             <Icons src={pointsIcon} />
-            <ProfileCardText>200</ProfileCardText>
+            <ProfileCardText>{pointsEarned}</ProfileCardText>
           </ProfileCardData>
           <Icons src={cardDivider} />
           <ProfileCardData>
             <Icons src={deployedIcon} />
-            <ProfileCardText>5</ProfileCardText>
+            <ProfileCardText>{quizDeployed}</ProfileCardText>
           </ProfileCardData>
           <Icons src={cardDivider} />
           <ProfileCardData>
             <Icons src={playedIcon} />
-            <ProfileCardText>15</ProfileCardText>
+            <ProfileCardText>{quizPlayed}</ProfileCardText>
           </ProfileCardData>
         </UserStats>
 
@@ -72,7 +116,7 @@ const Profile = () => {
             <>
               <StatsCard>
                 <><BG src={statsCardBG} /></>
-                <Text style={{width: "300px"}}>You have played a total <span style={{color: "#6A5AE0"}} >15 quizzes</span> on blockchain!</Text>
+                <Text style={{ width: "300px" }}>You have played a total <span style={{ color: "#6A5AE0" }} >{quizPlayed} quizzes</span> on blockchain!</Text>
               </StatsCard>
             </>
         }
