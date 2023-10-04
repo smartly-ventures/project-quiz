@@ -33,7 +33,7 @@ const Profile = () => {
   const [pointsEarned, setPointsEarned] = useState(0)
 
   const deployerContractAddress =
-    "0xb072d8deDb8B98baE0973E6F89D791A517962974";
+    "0x1218950c9E1e150F78C8b53260eAEb23e6885A31";
   const DeployerABI = deployer.output.abi;
 
   const deployerContract = async () => {

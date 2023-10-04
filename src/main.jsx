@@ -4,13 +4,13 @@ import ReactDOM from 'react-dom/client'
 import '@rainbow-me/rainbowkit/styles.css';
 import { getDefaultWallets, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { polygon, optimism, bsc, polygonMumbai, bscTestnet, optimismGoerli } from 'wagmi/chains';
+import { bscTestnet } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 
 import App from './App.jsx'
 
 const { chains, publicClient } = configureChains(
-  [polygon, optimism, bsc, polygonMumbai, bscTestnet, optimismGoerli],
+  [bscTestnet],
   [publicProvider()]
 );
 
@@ -28,7 +28,7 @@ const wagmiConfig = createConfig({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <WagmiConfig config={wagmiConfig}>
-    <RainbowKitProvider appInfo={{ appName: 'Smartly' }} chains={chains} theme={darkTheme()} initialChain={polygonMumbai}>
+    <RainbowKitProvider appInfo={{ appName: 'Smartly' }} chains={chains} theme={darkTheme()} initialChain={bscTestnet}>
       <App />
     </RainbowKitProvider>
   </WagmiConfig>

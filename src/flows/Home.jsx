@@ -17,7 +17,7 @@ const Home = () => {
 
     const { address } = useAccount()
     const [latestDeployedAddress, setLatestDeployedAddress] = useState("0x0000000000000000000000000000000000000000")
-    const deployerContractAddress = "0xb072d8deDb8B98baE0973E6F89D791A517962974";
+    const deployerContractAddress = "0x1218950c9E1e150F78C8b53260eAEb23e6885A31";
     const DeployerABI = deployer.output.abi;
 
     const getLatestQuiz = async () => {
@@ -37,7 +37,7 @@ const Home = () => {
                         signer,
                     );
                 setLatestDeployedAddress(await deployerContract.contractsDeployed(address, (Number(await deployerContract.numberOfContractsDeployed(address)) - 1)))
-                console.log(latestDeployedAddress)
+                console.log(await deployerContract.contractsDeployed(address, (Number(await deployerContract.numberOfContractsDeployed(address)) - 1)))
             }
 
         } catch (error) {

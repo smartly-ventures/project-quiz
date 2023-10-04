@@ -88,6 +88,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "creator",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "distributePrizes",
 				"outputs": [],
 				"stateMutability": "nonpayable",
@@ -140,6 +153,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "numberOfPlayers",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "parentContractAddress",
 				"outputs": [
 					{
@@ -166,6 +192,25 @@
 						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "players",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
 					}
 				],
 				"stateMutability": "view",
@@ -495,11 +540,11 @@
 			]
 		},
 		"contracts/Smartly.sol": {
-			"keccak256": "0x8432ec86a22b0d68e8fa93d102e983288fb99e3772ea5ceebf9296e6a76d4426",
+			"keccak256": "0x25006b27cc2a996ed1fd6daa3d8b051062d0adb03bc74018ef23fa1f675d4002",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://8e3309328b176a9c99b11aeb99ae8b8ad305e6720a1c9daae575a957024e5308",
-				"dweb:/ipfs/QmaEjPtmQy1EzY7kMTmGQRjfmXgPkm525dgrEjK8QATGbo"
+				"bzz-raw://2fab29b7a8d5750c6bd1415f4b487cd0321008152c73d4961bb6046b58f1a037",
+				"dweb:/ipfs/QmUsMSHYbw6p6vtGGA3WbcymZtRRTj3SXYARRLAbAr8ULB"
 			]
 		}
 	},

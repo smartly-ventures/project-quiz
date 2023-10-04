@@ -27,7 +27,7 @@ const Leaderboard = () => {
   const [pointsEarned, setPointsEarned] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
   const deployerContractAddress =
-    "0xb072d8deDb8B98baE0973E6F89D791A517962974";
+    "0x1218950c9E1e150F78C8b53260eAEb23e6885A31";
   const DeployerABI = deployer.output.abi;
 
   const getLeaderboard = async () => {
@@ -47,12 +47,18 @@ const Leaderboard = () => {
             signer,
           );
 
+        let tempLeaderboard = []
+        let tempPoints = []
+
         for (let i = 0; i < 10; i++) {
           let player = await deployerContract.leaderboard(i);
-          leaderboard[i] = player
+          tempLeaderboard.push(player)
           let points = await deployerContract.totalPointsEarned(player);
-          pointsEarned[i] = points
+          tempPoints.push(Number(points))
         }
+
+        setLeaderboard(tempLeaderboard)
+        setPointsEarned(tempPoints)
       }
 
     } catch (error) {

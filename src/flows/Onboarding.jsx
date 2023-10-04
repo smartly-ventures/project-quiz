@@ -173,7 +173,7 @@ const Onboarding = () => {
                         );
                     }}
                 </ConnectButton.Custom>
-                <TextSecondary>We support the following chains <Highlight>Polygon, Optimism, and Binance</Highlight></TextSecondary>
+                <TextSecondary>We support the following chain <Highlight>BNB Testnet</Highlight></TextSecondary>
             </Navigator>
         </Wrapper>
     )

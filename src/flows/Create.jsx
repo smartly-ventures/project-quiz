@@ -10,6 +10,7 @@ import { ethers } from 'ethers';
 import deployer from "../abi/deployer.json"
 import quizABI from "../abi/quiz.json"
 
+import copyIcon from "../assets/create-copy-icon.svg"
 import aiQuiz from "../assets/create-ai-quiz.svg"
 import manualQuiz from "../assets/create-manual-quiz.svg"
 import addOption from "../assets/create-add-option.svg"
@@ -18,12 +19,13 @@ import finalBG from "../assets/create-final-bg.svg"
 const Create = () => {
 
   const [quizCreated, setQuizCreated] = useState(false)
+  const [answersAdded, setAnswersAdded] = useState(false)
 
   const { address } = useAccount()
-  const deployerContractAddress = "0xb072d8deDb8B98baE0973E6F89D791A517962974";
+  const deployerContractAddress = "0x1218950c9E1e150F78C8b53260eAEb23e6885A31";
   const DeployerABI = deployer.output.abi;
 
-  const [latestDeployedAddress, setLatestDeployedAddress] = useState("0xb072d8deDb8B98baE0973E6F89D791A517962974")
+  const [latestDeployedAddress, setLatestDeployedAddress] = useState("0x1218950c9E1e150F78C8b53260eAEb23e6885A31")
 
   const deployQuiz = async () => {
     try {
@@ -53,6 +55,14 @@ const Create = () => {
         setLatestDeployedAddress(await deployerContract.contractsDeployed(address, (Number(await deployerContract.numberOfContractsDeployed(address)) - 1)))
         console.log(latestDeployedAddress)
         toast.success("Quiz Deployed")
+
+        if (creatorMode == "ai") {
+          setTitle("Finalize Quiz")
+          getQuiz(10, title, "intermidiate")
+        } else {
+          setTitle("Add Questions")
+        }
+
       }
 
     } catch (error) {
@@ -86,12 +96,44 @@ const Create = () => {
           );
         let res = await uploadQuestion.wait();
         console.log(res)
+        setAnswersAdded(true)
         toast.success("Questions Uploaded")
+        sendThemFlying()
       }
 
     } catch (error) {
       console.log(error.message);
       toast.error('Failed To Add Questions');
+    }
+  };
+
+  const setBet = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider =
+          new ethers.providers.Web3Provider(
+            ethereum,
+          );
+        const signer = provider.getSigner();
+        const quizContract =
+          new ethers.Contract(
+            latestDeployedAddress,
+            QuizABI,
+            signer,
+          );
+        toast('Setting Bet...', { style: { padding: '10px', color: '#FFFFFF', background: "#FFB380" } });
+        let setBet =
+          await quizContract.setPerPersonBet(betAmount);
+        let res = await setBet.wait();
+        console.log(res)
+        toast.success("Betting Amount Set")
+      }
+
+    } catch (error) {
+      console.log(error.message);
+      toast.error('Betting Amount Not Set');
     }
   };
 
@@ -107,23 +149,31 @@ const Create = () => {
   });
 
   const getQuiz = async (numberOfQuestion, topic, level) => {
-    let tempQuiz = quiz;
-    tempQuiz.questions.push(await openai.createCompletion({
-      model: "gpt-3.5-turbo-instruct",
-      prompt: `respond only in code and strictly dont include any other supporting text in your response with a ${numberOfQuestion} unique, new and random questions with 4 options quiz on topic ${topic} of ${level} level with different pointsIfCorrenct for each question depending on level of difficulty but with total for all questions equal to 100 in an array of objects format only, strictly use the below scema only: 
-            [ { question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" } ]`,
-      temperature: 1,
-    }))
-    setQuiz(tempQuiz);
+    try {
+      let tempQuiz = quiz;
+      tempQuiz.questions.push(await openai.createCompletion({
+        model: "gpt-3.5-turbo-instruct",
+        prompt: `respond only in code and strictly dont include any other supporting text in your response with a ${numberOfQuestion} unique, new and random questions with 4 options quiz on topic ${topic} of ${level} level with different pointsIfCorrenct for each question depending on level of difficulty but with total for all questions equal to 100 in an array of objects format only, strictly use the below scema only: 
+          [ { question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" } ]`,
+        temperature: 1,
+      }))
+      setQuiz(tempQuiz);
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   const sendThemFlying = () => {
     const jsConfetti = new JSConfetti()
     jsConfetti.addConfetti({
-      emojis: ['🏆'],
+      emojis: ['🥳', '🎉'],
       emojiSize: 100,
       confettiNumber: 30,
     })
+  }
+
+  const trimAddress2 = (address) => {
+    return address.substring(0, 8) + "..." + address.substring(34, 41)
   }
 
   const [title, setTitle] = useState("Create Quiz")
@@ -135,14 +185,6 @@ const Create = () => {
           quiz.quizTitle = quizTitle;
           quiz.quizDescription = quizDescription;
           await deployQuiz()
-          if (quizCreated) {
-            if (creatorMode == "ai") {
-              setTitle("Finalize Quiz")
-              getQuiz(10, title, "intermidiate")
-            } else {
-              setTitle("Add Questions")
-            }
-          }
           console.log("All Done")
         } else {
           toast.error('Description Required');
@@ -179,13 +221,21 @@ const Create = () => {
   const [quizDescription, setQuizDescription] = useState("")
   const [openAnswerDiv, setOpenAnswerDiv] = useState(0)
   const [question, setQuestion] = useState({ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" })
-
+  const [betAmount, setBetAmount] = useState(0)
 
   useEffect(() => {
     console.log(quiz)
     console.log(question)
   }, [quiz, question])
 
+  const copyContent = async () => {
+    try {
+      await navigator.clipboard.writeText(latestDeployedAddress);
+      toast.success('Address Copied');
+    } catch (err) {
+      toast.error('Failed To Copy');
+    }
+  }
 
   return (
     <Wrapper>
@@ -244,27 +294,37 @@ const Create = () => {
               <Button type="reset" onClick={sendNotificationQuestion} >Add Question</Button>
               {quiz.questions.length != 0 ? <Button style={{ marginTop: "-5px" }} onClick={() => { setTitle("Finalize Quiz") }} >Complete Quiz</Button> : <></>}
             </QuizDiv> :
-
-
-            <>
-              <FinalBG src={finalBG} />
-              <QuizDiv>
-                <Label style={{ fontSize: "16px" }} >Title: {quiz.quizTitle}</Label>
-                <Label style={{ fontSize: "12px", color: "#858494" }} >Description: {quiz.quizDescription}</Label>
-              </QuizDiv>
-              <QuizDiv style={{ paddingBottom: "80px" }}>
-                <Label style={{ fontSize: "16px" }} >Questions:</Label>
-                {quiz.questions.map((question, index) => {
-                  return (
-                    <Question>
-                      <SrNo>{index + 1}</SrNo>
-                      <Text>{question.question}</Text>
-                    </Question>
-                  )
-                })}
-                <Button type="reset" onClick={async () => { await uploadQuestion() }} >Upload Questions</Button>
-              </QuizDiv>
-            </>
+            answersAdded == false ?
+              <>
+                <FinalBG src={finalBG} />
+                <QuizDiv>
+                  <Label style={{ fontSize: "16px" }} >Title: {quiz.quizTitle}</Label>
+                  <Label style={{ fontSize: "12px", color: "#858494" }} >Description: {quiz.quizDescription}</Label>
+                </QuizDiv>
+                <QuizDiv style={{ paddingBottom: "80px" }}>
+                  <Label style={{ fontSize: "16px" }} >Questions:</Label>
+                  {quiz.questions.map((question, index) => {
+                    return (
+                      <Question>
+                        <SrNo>{index + 1}</SrNo>
+                        <Text>{question.question}</Text>
+                      </Question>
+                    )
+                  })}
+                  <Button type="reset" onClick={async () => { await uploadQuestion() }} >Upload Questions</Button>
+                </QuizDiv>
+              </> :
+              <>
+                <FinalBG src={finalBG} />
+                <QuizDiv style={{ paddingBottom: "80px" }} >
+                  <Label style={{ fontSize: "16px" }} >Quiz Ready</Label>
+                  <Label style={{ fontSize: "12px", color: "#858494", display: "flex", flexDirection: "row", alignItems: "center" }} >{trimAddress2(latestDeployedAddress)} <img style={{ marginLeft: "10px" }} src={copyIcon} onClick={copyContent} /></Label>
+                  <Label style={{ fontSize: "12px", color: "#858494" }} >Copy And Share The Address With Your Friends And Ask Them To Search The Address To Play The Quiz</Label>
+                  <Label>Bet Amount in Wei (Optional)</Label>
+                  <Input placeholder={0} onChange={(e) => setBetAmount(e.target.value)} type='number' />
+                  <Button type='reset' onClick={setBet} >Set Betting Amount</Button>
+                </QuizDiv>
+              </>
       }
       <Toaster position="top-right" />
 
