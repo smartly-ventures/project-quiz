@@ -95,14 +95,15 @@ const Search = () => {
             signer,
           );
 
-          let tempPoints = 0;
+        let tempPoints = 0;
         for (let i = 0; i < quiz.questions.length; i++) {
           if (answersByPlayer[i] == quiz.questions[i].correctOption) {
-            tempPoints += Number(quiz.questions[i].pointsIfCorrenct)
-            setTotalPoints(totalPoints + Number(quiz.questions[i].pointsIfCorrenct))
+            tempPoints += Number(quiz.questions[i].pointsIfCorrect)
           }
         }
-
+        
+        setTotalPoints(tempPoints)
+        
         const submitPoints = await quizContract.submitAnswers(tempPoints);
         let res = await submitPoints.wait();
         console.log(res)
@@ -238,7 +239,7 @@ const Search = () => {
                     <Button type='reset' onClick={() => { setPlayQuiz(true), setTitleText("Play Quiz") }} >Play Quiz</Button>
                 }
                 {
-                  creator == address ? <Button type='reset' style={{ marginTop: "0" }} onClick={distributePrize} >Distribute Prizes</Button> : <></>
+                  //creator == address ? <Button type='reset' style={{ marginTop: "0" }} onClick={distributePrize} >Distribute Prizes</Button> : <></>
                 }
 
               </QuizDiv>
@@ -249,7 +250,7 @@ const Search = () => {
 
                   <Row>
                     <Label style={{ color: "#858494", fontSize: "12px" }} >QUESTION {currentQuestion + 1} OF {quiz.questions.length}</Label>
-                    <Points>{quiz.questions[currentQuestion].pointsIfCorrenct ?? 0} Points</Points>
+                    <Points>{quiz.questions[currentQuestion].pointsIfCorrect ?? 0} Points</Points>
                   </Row>
                   <Label style={{ fontSize: "18px", marginBottom: "10px" }} >Q: {quiz.questions[currentQuestion].question}</Label>
                   <Choices style={optionSelected == 1 ? { background: "#C4D0FB" } : {}} onClick={() => { submitOption(currentQuestion, 1) }} >{quiz.questions[currentQuestion].options[1]}</Choices>
@@ -260,7 +261,7 @@ const Search = () => {
                   {
                     quiz.questions.length == currentQuestion + 1 ?
                       <Button type='reset' onClick={submitQuiz} >Complete Quiz</Button> :
-                      <Button type="reset" onClick={setCurrentQuestion(currentQuestion + 1)} >Next Question</Button>
+                      <Button type="reset" onClick={() => { setCurrentQuestion(currentQuestion + 1) }} >Next Question</Button>
                   }
                 </QuizDiv>
               </> :

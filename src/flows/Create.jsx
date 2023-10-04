@@ -57,8 +57,8 @@ const Create = () => {
         toast.success("Quiz Deployed")
 
         if (creatorMode == "ai") {
+          await getQuiz(10, quiz.quizTitle, "intermidiate")
           setTitle("Finalize Quiz")
-          getQuiz(10, title, "intermidiate")
         } else {
           setTitle("Add Questions")
         }
@@ -151,15 +151,22 @@ const Create = () => {
   const getQuiz = async (numberOfQuestion, topic, level) => {
     try {
       let tempQuiz = quiz;
-      tempQuiz.questions.push(await openai.createCompletion({
-        model: "gpt-3.5-turbo-instruct",
-        prompt: `respond only in code and strictly dont include any other supporting text in your response with a ${numberOfQuestion} unique, new and random questions with 4 options quiz on topic ${topic} of ${level} level with different pointsIfCorrenct for each question depending on level of difficulty but with total for all questions equal to 100 in an array of objects format only, strictly use the below scema only: 
-          [ { question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" } ]`,
-        temperature: 1,
-      }))
+      toast('AI Generating Quiz...', { style: { padding: '10px', color: '#FFFFFF', background: "#FFB380" } });
+      const chatCompletion = await openai.chat.completions.create({
+        messages: [{
+          role: "user", content: `respond only in code and strictly dont include any other supporting text in your response with a ${numberOfQuestion} unique, new and random questions with 4 options quiz on topic ${topic} of ${level} level with different pointsIfCorrect for each question depending on level of difficulty but with total for all questions equal to 100 in an array of objects format only, strictly use the below scema only: 
+          [ { question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrect: "" } ]` }],
+        model: "gpt-3.5-turbo",
+      });
+      console.log(JSON.parse(chatCompletion.choices[0].message.content))
+      console.log(tempQuiz.questions)
+      tempQuiz.questions = JSON.parse(chatCompletion.choices[0].message.content)
+      console.log(tempQuiz)
       setQuiz(tempQuiz);
+      toast.success("AI Quiz Generated")
     } catch (err) {
       console.log(err)
+      toast.error("AI Unable To Generate Quiz")
     }
   }
 
@@ -199,12 +206,12 @@ const Create = () => {
 
   const sendNotificationQuestion = async () => {
     if (question.question != "") {
-      if (question.pointsIfCorrenct != "") {
+      if (question.pointsIfCorrect != "") {
         if (question.options != "") {
           let tempQuiz = quiz;
           tempQuiz.questions.push(question);
           setQuiz(tempQuiz);
-          setQuestion({ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" });
+          setQuestion({ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrect: "" });
         } else {
           toast.error('Add Options');
         }
@@ -220,7 +227,7 @@ const Create = () => {
   const [quizTitle, setQuizTitle] = useState("")
   const [quizDescription, setQuizDescription] = useState("")
   const [openAnswerDiv, setOpenAnswerDiv] = useState(0)
-  const [question, setQuestion] = useState({ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrenct: "" })
+  const [question, setQuestion] = useState({ question: "", options: { 1: "", 2: "", 3: "", 4: "", }, correctOption: "", pointsIfCorrect: "" })
   const [betAmount, setBetAmount] = useState(0)
 
   useEffect(() => {
@@ -253,7 +260,7 @@ const Create = () => {
                 <TextPrimary style={{ fontSize: "14px", marginTop: "10px" }} >Create Quiz <br /> Manually</TextPrimary>
               </BoxChoices>
             </Choices>
-            <Label>Title</Label>
+            <Label>Title (Used As Prompt If AI Quiz Selected)</Label>
             <Input placeholder="Are You A Web3 Degen?" onChange={(e) => setQuizTitle(e.target.value)} />
             <Label>Description</Label>
             <Input placeholder="Prove You Are A Degen By Taking This Quiz..." onChange={(e) => setQuizDescription(e.target.value)} />
@@ -267,7 +274,7 @@ const Create = () => {
               <Label>Add Question</Label>
               <Input placeholder="Do you make smart contract quizzes using smartly?" onChange={(e) => question.question = e.target.value} />
               <Label>Set Points</Label>
-              <Input type='number' placeholder='69' onChange={(e) => question.pointsIfCorrenct = e.target.value} />
+              <Input type='number' placeholder='69' onChange={(e) => question.pointsIfCorrect = e.target.value} />
               <Label>Add Options</Label>
 
               <Choices>
