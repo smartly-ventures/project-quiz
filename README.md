@@ -37,3 +37,7 @@ To get started with Smartly Quizzes, follow these steps:
    ```bash
    git clone https://github.com/smartly-ventures/project-quiz.git
    ```
+
+## Contact
+
+Website: [Smartly Ventures](smartly.ventures)
